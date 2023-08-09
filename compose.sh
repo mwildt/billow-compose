@@ -96,12 +96,15 @@ process_service_line_rm() {
   service_name="$1"
   service_state=$(get_service_state $service_name)
   case "$service_state" in
-    "running" | "exited" )
+    "running" | "exited" | "created")
       echo "[$service_name] remove service"
       $engine rm -f $service_name >/dev/null
       ;;
+    "absent")
+       echo "[$service_name] already absent"
+       ;;
     *)
-       echo "[$service_name] already stopped"
+       echo "[$service_name] illegal state $service_state "
        ;;
     esac
 }
@@ -202,7 +205,7 @@ process_service_line_run() {
            $engine run -d $engine_args --name $service_name -l $checksum_label=$config_checksum $image $entry 2>&1 1>/dev/null
          fi
          ;;
-     "exited" )
+     "exited" | "created" )
         if [ "$config_checksum" = "$container_checksum" ]; then
             echo "[$service_name] start service"
             $engine start $service_name >/dev/null
