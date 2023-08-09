@@ -15,17 +15,14 @@ join_by_char() {
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-     run | up)
+     up)
        job="run"
        ;;
-     stop)
-      job="stop"
+     stop | state | rm | run)
+      job="$1"
       ;;
-     state)
-      job="state"
-      ;;
-     --bollow-file)
-         billow_file=$2
+     --billowfile)
+         billowfile=$2
          shift;
          ;;
      --podman)
@@ -72,6 +69,9 @@ process_service_line() {
     state)
       process_service_line_state "$@"
       ;;
+    rm)
+      process_service_line_rm "$@"
+      ;;
     *) echo "Job $job is not defined for processor-type services" >&2
       exit 1
       ;;
@@ -109,7 +109,11 @@ process_service_line_rm() {
 get_service_state () {
   service_name="$1"
   service_state=$($engine inspect $service_name -f '{{.State.Status}}' 2>/dev/null)
-  echo $service_state
+   if [ $? -gt 0 ]; then
+      echo "absent"
+   else
+      echo $service_state
+   fi
 }
 
 get_service_checksum () {
@@ -182,6 +186,7 @@ process_service_line_run() {
   container_checksum=$(get_service_checksum $service_name)
   service_state=$(get_service_state $service_name)
 
+  echo "state $service_state"
    case "$service_state" in
      "absent" )
         echo "[$service_name] create service"
