@@ -177,6 +177,10 @@ process_service_line_run() {
           engine_args="${engine_args} --secret $2"
           shift
           ;;
+        --log-driver)
+          engine_args="${engine_args} --log-driver $2"
+          shift
+          ;;
        *) echo "unkown service parameter $1" >&2
          exit 1
          ;;
