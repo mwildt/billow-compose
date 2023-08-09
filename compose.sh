@@ -193,7 +193,6 @@ process_service_line_run() {
   container_checksum=$(get_service_checksum $service_name)
   service_state=$(get_service_state $service_name)
 
-  echo "state $service_state"
    case "$service_state" in
      "absent" )
         echo "[$service_name] create service"
